@@ -1,0 +1,34 @@
+dataset_path: datasets/h9gi-nx95_2021_2024.csv
+
+target:
+  name: serious_event
+  definition: "number_of_persons_killed > 0 or number_of_persons_injured >= 2"
+  notes: "Injury and fatality count fields are used only for target construction and diagnostics."
+
+split:
+  train_start: "2021-01-01"
+  train_end: "2022-12-31"
+  validation_start: "2023-01-01"
+  validation_end: "2023-12-31"
+  test_start: "2024-01-01"
+  test_end: "2024-12-31"
+
+features:
+  include_contributing_factors: false
+  include_street_names: false
+
+model:
+  type: logistic_regression
+  random_seed: 42
+  class_weight: balanced
+  max_iter: 500
+  solver: saga
+
+output:
+  artifacts_dir: artifacts
+  model_path: artifacts/baseline_logistic_regression.joblib
+  evaluation_path: artifacts/evaluation_results.json
+  validation_predictions_path: artifacts/validation_predictions.csv
+  test_predictions_path: artifacts/test_predictions.csv
+  reports_dir: reports
+  figures_dir: reports/figures

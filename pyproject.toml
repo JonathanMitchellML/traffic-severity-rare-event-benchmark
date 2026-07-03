@@ -1,0 +1,11 @@
+[project]
+name = "traffic-severity-rare-event-benchmark"
+version = "0.1.0"
+description = "Leakage-aware rare-event benchmark for severe NYC traffic crash outcomes."
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
