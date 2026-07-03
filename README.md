@@ -4,6 +4,12 @@ This project is a reproducible, leakage-aware machine learning benchmark for pre
 
 The goal is not leaderboard-style model performance. The goal is to show professional applied ML judgment: explicit target definition, chronological splitting, leakage controls, rare-event metrics, reproducible reporting, tests, and readable scripts.
 
+## Baseline Result
+
+Using a validation-selected threshold of `0.580`, the baseline logistic regression model achieved test F1 of `0.2644`, precision of `0.1846`, recall of `0.4660`, and PR-AUC of `0.1950` on the held-out 2024 test split.
+
+See [`reports/evaluation_summary.md`](reports/evaluation_summary.md) and [`reports/model_card.md`](reports/model_card.md) for details.
+
 ## Why This Project Exists
 
 Traffic crash severity prediction is a realistic rare-event modeling problem. Severe outcomes are uncommon, easy to overstate with the wrong metric, and vulnerable to leakage if injury, fatality, or post-report fields are used incorrectly. This repository demonstrates a conservative baseline workflow that a technical reviewer can inspect end to end.
@@ -115,7 +121,7 @@ make run
 
 ## Expected Outputs
 
-Generated files are ignored by Git:
+Model artifacts and prediction files are generated locally and ignored by Git:
 
 ```text
 artifacts/baseline_logistic_regression.joblib
@@ -123,6 +129,11 @@ artifacts/baseline_logistic_regression.metadata.json
 artifacts/evaluation_results.json
 artifacts/validation_predictions.csv
 artifacts/test_predictions.csv
+```
+
+Reviewer-facing reports and figures are committed to the repository:
+
+```text
 reports/evaluation_summary.md
 reports/model_card.md
 reports/figures/
@@ -149,4 +160,4 @@ To run the full pipeline in Docker, mount a local dataset directory and override
 
 ## Development Note
 
-Development note: This project was developed with AI-assisted coding support. The problem framing, target definition, leakage policy, evaluation design, code review, and final validation are author-owned.
+This project was developed with AI-assisted coding support. The problem framing, target definition, leakage policy, evaluation design, code review, and final validation are author-owned.
