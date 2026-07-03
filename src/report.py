@@ -35,10 +35,19 @@ def _load_results(config: dict) -> dict[str, Any]:
     return json.loads(evaluation_path.read_text(encoding="utf-8"))
 
 
-def _plot_pr_curve(predictions: pd.DataFrame, title: str, path: Path) -> None:
+def _plot_pr_curve(predictions: pd.DataFrame, title: str, path: Path, prevalence: float | None) -> None:
     precision, recall, _ = precision_recall_curve(predictions["y_true"], predictions["score"])
     plt.figure(figsize=(7, 5))
     plt.plot(recall, precision, linewidth=2)
+    if prevalence is not None:
+        plt.axhline(
+            prevalence,
+            linestyle="--",
+            color="gray",
+            linewidth=1.5,
+            label=f"Target prevalence ({_pct(prevalence)})",
+        )
+        plt.legend()
     plt.xlabel("Recall")
     plt.ylabel("Precision")
     plt.title(title)
@@ -118,10 +127,17 @@ def write_evaluation_summary(results: dict[str, Any], report_path: Path) -> None
     )
 
     street_policy = results.get("feature_policy", {})
-    street_note = street_policy.get(
-        "street_name_note",
-        "Street-name fields are excluded by default for the initial baseline.",
-    )
+    if street_policy.get("street_names_included", False):
+        feature_runtime_policy = (
+            "Street-name fields are enabled for this run. The baseline feature set also uses crash time, "
+            "calendar features, borough/ZIP/location coordinates when valid, and vehicle type codes."
+        )
+    else:
+        feature_runtime_policy = (
+            "Street-name fields are excluded by default because they are high-cardinality fields for "
+            "the initial baseline. The baseline feature set instead uses crash time, calendar features, "
+            "borough/ZIP/location coordinates when valid, and vehicle type codes."
+        )
 
     body = f"""# Evaluation Summary
 
@@ -162,7 +178,7 @@ The baseline excludes injury/fatality count fields from model features after tar
 
 ## Feature Runtime Policy
 
-{street_note}
+{feature_runtime_policy}
 """
     report_path.write_text(body, encoding="utf-8")
 
@@ -188,7 +204,7 @@ NYC Motor Vehicle Collisions crash records, expected locally at `{results['datas
 
 ## Features
 
-    The initial feature set uses crash time, calendar features, borough/ZIP/location coordinates when valid, and vehicle type codes. Street-name fields are excluded by default because they are high-cardinality fields for an initial baseline.
+The initial feature set uses crash time, calendar features, borough/ZIP/location coordinates when valid, and vehicle type codes. Street-name fields are excluded by default because they are high-cardinality fields for an initial baseline.
 
 ## Leakage Controls
 
@@ -230,8 +246,18 @@ def generate_reports(config: dict) -> None:
     validation_predictions = pd.read_csv(validation_predictions_path)
     test_predictions = pd.read_csv(test_predictions_path)
 
-    _plot_pr_curve(validation_predictions, "Validation Precision-Recall Curve", figures_dir / "validation_pr_curve.png")
-    _plot_pr_curve(test_predictions, "Test Precision-Recall Curve", figures_dir / "test_pr_curve.png")
+    _plot_pr_curve(
+        validation_predictions,
+        "Validation Precision-Recall Curve",
+        figures_dir / "validation_pr_curve.png",
+        results["splits"]["validation"]["target_rate"],
+    )
+    _plot_pr_curve(
+        test_predictions,
+        "Test Precision-Recall Curve",
+        figures_dir / "test_pr_curve.png",
+        results["splits"]["test"]["target_rate"],
+    )
     _plot_confusion_matrix(results["test"]["confusion_matrix"], figures_dir / "test_confusion_matrix.png")
     _plot_threshold_sweep(results["threshold_sweep"], figures_dir / "validation_threshold_sweep.png")
 

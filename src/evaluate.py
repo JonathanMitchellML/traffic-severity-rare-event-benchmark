@@ -152,7 +152,10 @@ def evaluate_from_config(config: dict) -> dict[str, Any]:
         "feature_policy": {
             "street_names_included": include_street_names,
             "street_name_columns": STREET_FEATURES,
-            "street_name_note": "Excluded by default because they are high-cardinality fields for the initial baseline.",
+            "street_name_note": (
+                "Street-name fields are excluded by default because they are high-cardinality fields "
+                "for the initial baseline."
+            ),
         },
         "contributing_factor_policy": {
             "included": include_factors,
